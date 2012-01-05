@@ -96,6 +96,7 @@ class Communicator {
 
 
             while (mRunning) {
+                //TODO reuse buffer/modify the data
                 ByteBuffer buffer = ByteBuffer.allocate(1024);
                 buffer.put("CTRL".getBytes());
                 buffer.put(mTrustServer);
@@ -106,12 +107,9 @@ class Communicator {
                 buffer.putInt(0); //dy
                 buffer.put((byte) 0); //kb
 
-                // TODO why are these needed???!!1
+                //padding bytes
                 buffer.put((byte) 0);
-                buffer.put((byte) 0);
-                buffer.put((byte) 0);
-                buffer.put((byte) 0);
-                buffer.put((byte) 0);
+                buffer.putInt(0);
 
                 synchronized (mTrustMessages) {
                     if (mTrustTimeout == 0) {
