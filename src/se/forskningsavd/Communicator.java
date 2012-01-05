@@ -10,7 +10,7 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-public class Communicator {
+class Communicator {
     static class ReceiverThread extends Thread {
         private final DatagramSocket mSocket;
         private boolean mRunning = true;
@@ -72,7 +72,7 @@ public class Communicator {
         private boolean mRunning = true;
         private byte mTrustServer;
         private byte mTrustClient;
-        private ArrayList<byte[]> mTrustMessages = new ArrayList<byte[]>();
+        private final ArrayList<byte[]> mTrustMessages = new ArrayList<byte[]>();
         private int mTrustTimeout;
 
         public SenderThread(DatagramSocket socket) {
@@ -81,7 +81,7 @@ public class Communicator {
 
         @Override
         public void run() {
-            InetAddress hostAddress = null;
+            InetAddress hostAddress;
             try {
                 hostAddress = InetAddress.getByName(Settings.HOST);
                 final String message = "HELO";
