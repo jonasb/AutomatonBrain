@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 public class MainActivity extends Activity {
     private Communicator mCommunicator;
@@ -13,9 +16,11 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mCommunicator = new Communicator();
+        Navigator nav = new Navigator();
+        mCommunicator = new Communicator(nav);
 
         LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
 
         Button button = new Button(this);
         button.setText("Connect");
@@ -34,6 +39,10 @@ public class MainActivity extends Activity {
             }
         });
         layout.addView(helloWorld);
+
+        NavigationView navigationView = new NavigationView(this, nav);
+        LayoutParams p = new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+        layout.addView(navigationView, p);
 
         setContentView(layout);
     }

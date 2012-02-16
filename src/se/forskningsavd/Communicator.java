@@ -69,14 +69,16 @@ class Communicator {
          */
         private static final int TIMEOUT_TRUST = 16;
         private final DatagramSocket mSocket;
+        private final Navigator mNavigator;
         private boolean mRunning = true;
         private byte mTrustServer;
         private byte mTrustClient;
         private final ArrayList<byte[]> mTrustMessages = new ArrayList<byte[]>();
         private int mTrustTimeout;
 
-        public SenderThread(DatagramSocket socket) {
+        public SenderThread(DatagramSocket socket, Navigator navigator) {
             mSocket = socket;
+            mNavigator = navigator;
         }
 
         @Override
@@ -94,22 +96,31 @@ class Communicator {
                 return;
             }
 
-
             while (mRunning) {
+                byte kb = 0;
+                if (mNavigator.left)
+                    kb |= 1;
+                if (mNavigator.right)
+                    kb |= 1 << 1;
+                if (mNavigator.up)
+                    kb |= 1 << 2;
+                if (mNavigator.down)
+                    kb |= 1 << 3;
                 //TODO reuse buffer/modify the data
                 ByteBuffer buffer = ByteBuffer.allocate(1024);
                 buffer.put("CTRL".getBytes());
                 buffer.put(mTrustServer);
                 buffer.put(mTrustClient);
+                buffer.put((byte) 0); //padding
+                buffer.put((byte) 0); //padding
                 buffer.putInt(0); //mx
                 buffer.putInt(0); //my
                 buffer.putInt(0); //dx
                 buffer.putInt(0); //dy
-                buffer.put((byte) 0); //kb
-
-                //padding bytes
-                buffer.put((byte) 0);
-                buffer.putInt(0);
+                buffer.put(kb);
+                buffer.put((byte) 0); //padding
+                buffer.put((byte) 0); //padding
+                buffer.put((byte) 0); //padding
 
                 synchronized (mTrustMessages) {
                     if (mTrustTimeout == 0) {
@@ -133,12 +144,13 @@ class Communicator {
                     }
                     Log.d("XXX", "sending " + debug.toString());
                 } catch (IOException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    e.printStackTrace();
                 }
 
                 try {
                     sleep(20);
                 } catch (InterruptedException e) {
+                    //ignore
                 }
             }
         }
@@ -175,6 +187,11 @@ class Communicator {
 
     private ReceiverThread mReceiverThread;
     private SenderThread mSenderThread;
+    private final Navigator mNavigator;
+
+    public Communicator(Navigator nav) {
+        mNavigator = nav;
+    }
 
     public void connect() {
         disconnect();
@@ -186,7 +203,7 @@ class Communicator {
             e.printStackTrace();
             return;
         }
-        mSenderThread = new SenderThread(socket);
+        mSenderThread = new SenderThread(socket, mNavigator);
         mSenderThread.start();
 
         mReceiverThread = new ReceiverThread(socket, mSenderThread);
