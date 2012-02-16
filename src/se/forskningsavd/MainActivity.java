@@ -32,10 +32,11 @@ public class MainActivity extends Activity {
         layout.addView(button);
 
         Button helloWorld = new Button(this);
-        helloWorld.setText("Hello World");
+        helloWorld.setText("Automaton brain");
         helloWorld.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                mCommunicator.sendText("Hello world");
+                mCommunicator.sendText("/voice");
+                mCommunicator.sendText("Automaton brain");
             }
         });
         layout.addView(helloWorld);
