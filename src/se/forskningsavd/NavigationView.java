@@ -39,14 +39,20 @@ class NavigationView extends View {
 
             final float x = event.getX();
             final float y = event.getY();
+
+            mNavigator.moveX = (x - width / 2) / (width / 2);
+            mNavigator.moveY = (y - height / 2) / (height / 2);
+            /*
+            // wasd
             mNavigator.left = (x < width / 3);
             mNavigator.right = (x > width * 2 / 3);
             mNavigator.up = (y < height / 3);
             mNavigator.down = (y > height * 2 / 3);
+            */
             return true;
         case ACTION_CANCEL:
         case ACTION_UP:
-            mNavigator.up = mNavigator.down = mNavigator.left = mNavigator.right = false;
+            mNavigator.reset();
             return true;
         default:
             return false;

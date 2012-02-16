@@ -115,8 +115,8 @@ class Communicator {
                 buffer.put((byte) 0); //padding
                 buffer.putInt(0); //mx
                 buffer.putInt(0); //my
-                buffer.putInt(0); //dx
-                buffer.putInt(0); //dy
+                buffer.putInt((int) (mNavigator.moveX * 128)); //dx -1..1 -> -127..127
+                buffer.putInt((int) (mNavigator.moveY * 128)); //dy -1..1 -> -127..127
                 buffer.put(kb);
                 buffer.put((byte) 0); //padding
                 buffer.put((byte) 0); //padding
