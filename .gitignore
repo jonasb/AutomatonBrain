@@ -1,5 +1,7 @@
-local.properties
 .idea/
 bin/
 gen/
+libs/
+obj/
 out/
+local.properties

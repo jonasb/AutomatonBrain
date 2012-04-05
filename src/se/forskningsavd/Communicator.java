@@ -1,5 +1,8 @@
 package se.forskningsavd;
 
+import android.graphics.Bitmap;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
@@ -11,33 +14,52 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 class Communicator {
+    public interface Callback {
+        public void onTargetImageChanged(Bitmap bitmap);
+    }
+
     static class ReceiverThread extends Thread {
         private final DatagramSocket mSocket;
         private boolean mRunning = true;
         private final SenderThread mSenderThread;
+        private final Decoder mDecoder;
+        private final Bitmap mTargetBitmap;
+        private final Handler mHandler;
 
-        public ReceiverThread(DatagramSocket socket, SenderThread senderThread) {
+        public ReceiverThread(DatagramSocket socket, SenderThread senderThread, Decoder decoder, Bitmap targetBitmap, Handler handler) {
             mSocket = socket;
             mSenderThread = senderThread;
+            mDecoder = decoder;
+            mTargetBitmap = targetBitmap;
+            mHandler = handler;
         }
 
         @Override
         public void run() {
-            byte[] buf = new byte[1000];
-            DatagramPacket dp = new DatagramPacket(buf, buf.length);
+            byte[] buf = new byte[3000];
             while (mRunning) {
                 try {
+                    DatagramPacket dp = new DatagramPacket(buf, buf.length);
                     mSocket.receive(dp);
                     StringBuilder debug = new StringBuilder();
-                    for (int i = 0; i < dp.getLength(); i++) {
-                        debug.append(String.format("%02x", dp.getData()[i]));
+                    final int length = dp.getLength();
+                    if (length < 1000) {
+                        for (int i = 0; i < length; i++) {
+                            debug.append(String.format("%02x", dp.getData()[i]));
+                        }
                     }
-                    String rcvd = "rcvd from " + dp.getAddress() + ", " + dp.getPort() + ": "
+                    String rcvd = "rcvd from " + dp.getAddress() + ", " + dp.getPort() + ", " + length + " bytes : "
                             + debug;
                     Log.d("XXX", rcvd);
 
                     ByteBuffer data = ByteBuffer.wrap(dp.getData());
-                    if (data.get(0) == 'D' &&
+                    if (data.get(0) == 0 &&
+                            data.get(1) == 0 &&
+                            data.get(2) == 0 &&
+                            data.get(3) == 1) {
+                        Log.d("decode", "h264 frame decode= " + mDecoder.decode(data.array(), mTargetBitmap));
+                        mHandler.sendEmptyMessage(0);
+                    } else if (data.get(0) == 'D' &&
                             data.get(1) == 'A' &&
                             data.get(2) == 'T' &&
                             data.get(3) == 'A') {
@@ -188,9 +210,13 @@ class Communicator {
     private ReceiverThread mReceiverThread;
     private SenderThread mSenderThread;
     private final Navigator mNavigator;
+    private final Bitmap mTargetBitmap;
+    private final Callback mCallback;
 
-    public Communicator(Navigator nav) {
+    public Communicator(Navigator nav, Bitmap target, Callback callback) {
         mNavigator = nav;
+        mTargetBitmap = target;
+        mCallback = callback;
     }
 
     public void connect() {
@@ -206,7 +232,16 @@ class Communicator {
         mSenderThread = new SenderThread(socket, mNavigator);
         mSenderThread.start();
 
-        mReceiverThread = new ReceiverThread(socket, mSenderThread);
+        Decoder d = new Decoder();
+        Log.d("decode", "init(): " + d.init());
+
+        final Handler handler = new Handler(new Handler.Callback() {
+            public boolean handleMessage(Message message) {
+                mCallback.onTargetImageChanged(mTargetBitmap);
+                return false;
+            }
+        });
+        mReceiverThread = new ReceiverThread(socket, mSenderThread, d, mTargetBitmap, handler);
         mReceiverThread.start();
     }
 

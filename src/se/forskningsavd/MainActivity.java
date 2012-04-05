@@ -1,11 +1,13 @@
 package se.forskningsavd;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
@@ -15,9 +17,15 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final ImageView video = new ImageView(this);
 
         Navigator nav = new Navigator();
-        mCommunicator = new Communicator(nav);
+        Bitmap target = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
+        mCommunicator = new Communicator(nav, target, new Communicator.Callback() {
+            public void onTargetImageChanged(Bitmap bitmap) {
+                video.invalidate();
+            }
+        });
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -41,9 +49,15 @@ public class MainActivity extends Activity {
         });
         layout.addView(helloWorld);
 
+        FrameLayout frame = new FrameLayout(this);
+
+        video.setImageBitmap(target);
+        frame.addView(video);
+
         NavigationView navigationView = new NavigationView(this, nav);
-        LayoutParams p = new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
-        layout.addView(navigationView, p);
+        frame.addView(navigationView);
+
+        layout.addView(frame, MATCH_PARENT, MATCH_PARENT);
 
         setContentView(layout);
     }
