@@ -30,11 +30,12 @@ public class MainActivity extends Activity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        Button button = new Button(this);
+        final Button button = new Button(this);
         button.setText("Connect");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 mCommunicator.connect();
+                button.setVisibility(View.GONE);
             }
         });
         layout.addView(button);
