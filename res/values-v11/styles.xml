@@ -1,0 +1,4 @@
+<resources>
+    <style name="Main" parent="android:Theme.Holo.NoActionBar.Fullscreen">
+    </style>
+</resources>
