@@ -19,15 +19,15 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         final ImageView video = new ImageView(this);
 
-        Navigator nav = new Navigator();
-        Bitmap target = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
+        final Navigator nav = new Navigator();
+        final Bitmap target = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
         mCommunicator = new Communicator(nav, target, new Communicator.Callback() {
             public void onTargetImageChanged(Bitmap bitmap) {
                 video.invalidate();
             }
         });
 
-        LinearLayout layout = new LinearLayout(this);
+        final LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final Button button = new Button(this);
@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
         });
         layout.addView(button);
 
-        Button helloWorld = new Button(this);
+        final Button helloWorld = new Button(this);
         helloWorld.setText("Automaton brain");
         helloWorld.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -50,12 +50,12 @@ public class MainActivity extends Activity {
         });
         layout.addView(helloWorld);
 
-        FrameLayout frame = new FrameLayout(this);
+        final FrameLayout frame = new FrameLayout(this);
 
         video.setImageBitmap(target);
         frame.addView(video);
 
-        NavigationView navigationView = new NavigationView(this, nav);
+        final NavigationView navigationView = new NavigationView(this, nav);
         frame.addView(navigationView);
 
         layout.addView(frame, MATCH_PARENT, MATCH_PARENT);

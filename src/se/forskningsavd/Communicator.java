@@ -37,23 +37,23 @@ class Communicator {
 
         @Override
         public void run() {
-            byte[] buf = new byte[3000];
+            final byte[] buf = new byte[3000];
             while (mRunning) {
                 try {
-                    DatagramPacket dp = new DatagramPacket(buf, buf.length);
+                    final DatagramPacket dp = new DatagramPacket(buf, buf.length);
                     mSocket.receive(dp);
-                    StringBuilder debug = new StringBuilder();
+                    final StringBuilder debug = new StringBuilder();
                     final int length = dp.getLength();
                     if (length < 1000) {
                         for (int i = 0; i < length; i++) {
                             debug.append(String.format("%02x", dp.getData()[i]));
                         }
                     }
-                    String rcvd = "rcvd from " + dp.getAddress() + ", " + dp.getPort() + ", " + length + " bytes : "
+                    final String rcvd = "rcvd from " + dp.getAddress() + ", " + dp.getPort() + ", " + length + " bytes : "
                             + debug;
                     Log.d("XXX", rcvd);
 
-                    ByteBuffer data = ByteBuffer.wrap(dp.getData());
+                    final ByteBuffer data = ByteBuffer.wrap(dp.getData());
                     if (data.get(0) == 0 &&
                             data.get(1) == 0 &&
                             data.get(2) == 0 &&
@@ -68,7 +68,7 @@ class Communicator {
                             // TODO signed vs unsigned
                             final byte trustServer = data.get(4);
                             final byte trustClient = data.get(5);
-                            int timer = data.getInt(6);
+                            final int timer = data.getInt(6);
                             mSenderThread.onServerData(trustServer, trustClient);
 
                             //TODO handle server trusted data
@@ -106,13 +106,13 @@ class Communicator {
 
         @Override
         public void run() {
-            InetAddress hostAddress;
+            final InetAddress hostAddress;
             try {
                 hostAddress = InetAddress.getByName(Settings.HOST);
                 final String message = "HELO";
-                byte[] buf = message.getBytes();
+                final byte[] buf = message.getBytes();
 
-                DatagramPacket out = new DatagramPacket(buf, buf.length, hostAddress, Settings.PORT);
+                final DatagramPacket out = new DatagramPacket(buf, buf.length, hostAddress, Settings.PORT);
                 mSocket.send(out);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -132,7 +132,7 @@ class Communicator {
                 if (mNavigator.down)
                     kb |= 1 << 3;
                 //TODO reuse buffer/modify the data
-                ByteBuffer buffer = ByteBuffer.allocate(1024);
+                final ByteBuffer buffer = ByteBuffer.allocate(1024);
                 buffer.order(ByteOrder.LITTLE_ENDIAN);
                 buffer.put("CTRL".getBytes());
                 buffer.put(mTrustServer);
@@ -165,10 +165,10 @@ class Communicator {
                     }
                 }
 
-                DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, 6979);
+                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, 6979);
                 try {
                     mSocket.send(out);
-                    StringBuilder debug = new StringBuilder();
+                    final StringBuilder debug = new StringBuilder();
                     for (int i = 0; i < buffer.position(); i++) {
                         debug.append(String.format("%02x", buffer.get(i)));
                     }
@@ -207,7 +207,7 @@ class Communicator {
         }
 
         public void addTrustedMessage(byte[] ident, byte[] message) {
-            ByteBuffer buf = ByteBuffer.allocate(ident.length + 1 + message.length);
+            final ByteBuffer buf = ByteBuffer.allocate(ident.length + 1 + message.length);
             buf.put(ident);
             buf.put((byte) message.length);
             buf.put(message);
@@ -244,8 +244,8 @@ class Communicator {
         mSenderThread = new SenderThread(socket, mNavigator);
         mSenderThread.start();
 
-        Decoder d = new Decoder();
-        Log.d("decode", "init(): " + d.init());
+        final Decoder d = new Decoder();
+        d.init();
 
         final Handler handler = new Handler(new Handler.Callback() {
             public boolean handleMessage(Message message) {
