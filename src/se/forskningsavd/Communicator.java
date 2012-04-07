@@ -15,6 +15,11 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 class Communicator {
+    private static final String SEND_TAG = "Sending";
+    private static final String RECEIVE_TAG = "Receiving";
+    private static final boolean DEBUG_SENDING = false;
+    private static final boolean DEBUG_RECEIVING = false;
+
     public interface Callback {
         public void onTargetImageChanged(Bitmap bitmap);
     }
@@ -42,23 +47,25 @@ class Communicator {
                 try {
                     final DatagramPacket dp = new DatagramPacket(buf, buf.length);
                     mSocket.receive(dp);
-                    final StringBuilder debug = new StringBuilder();
-                    final int length = dp.getLength();
-                    if (length < 1000) {
-                        for (int i = 0; i < length; i++) {
-                            debug.append(String.format("%02x", dp.getData()[i]));
+                    if (DEBUG_RECEIVING) {
+                        final StringBuilder debug = new StringBuilder();
+                        final int length = dp.getLength();
+                        if (length < 1000) {
+                            for (int i = 0; i < length; i++) {
+                                debug.append(String.format("%02x", dp.getData()[i]));
+                            }
                         }
+                        final String rcvd = "rcvd from " + dp.getAddress() + ", " + dp.getPort() + ", " + length + " bytes : "
+                                + debug;
+                        Log.d(RECEIVE_TAG, rcvd);
                     }
-                    final String rcvd = "rcvd from " + dp.getAddress() + ", " + dp.getPort() + ", " + length + " bytes : "
-                            + debug;
-                    Log.d("XXX", rcvd);
 
                     final ByteBuffer data = ByteBuffer.wrap(dp.getData());
                     if (data.get(0) == 0 &&
                             data.get(1) == 0 &&
                             data.get(2) == 0 &&
                             data.get(3) == 1) {
-                        Log.d("decode", "h264 frame decode= " + mDecoder.decode(data.array(), mTargetBitmap));
+                        mDecoder.decode(data.array(), mTargetBitmap);
                         mHandler.sendEmptyMessage(0);
                     } else if (data.get(0) == 'D' &&
                             data.get(1) == 'A' &&
@@ -155,7 +162,9 @@ class Communicator {
                 synchronized (mTrustMessages) {
                     if (mTrustTimeout == 0) {
                         if (mTrustMessages.size() > 0) {
-                            Log.d("XXX", "add trust message");
+                            if (DEBUG_SENDING) {
+                                Log.d(SEND_TAG, "add trust message");
+                            }
                             final byte[] msg = mTrustMessages.get(0);
                             buffer.put(msg);
                             mTrustTimeout = TIMEOUT_TRUST;
@@ -165,14 +174,16 @@ class Communicator {
                     }
                 }
 
-                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, 6979);
+                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, Settings.PORT);
                 try {
                     mSocket.send(out);
-                    final StringBuilder debug = new StringBuilder();
-                    for (int i = 0; i < buffer.position(); i++) {
-                        debug.append(String.format("%02x", buffer.get(i)));
+                    if (DEBUG_SENDING) {
+                        final StringBuilder debug = new StringBuilder();
+                        for (int i = 0; i < buffer.position(); i++) {
+                            debug.append(String.format("%02x", buffer.get(i)));
+                        }
+                        Log.d(SEND_TAG, "sending " + debug.toString());
                     }
-                    Log.d("XXX", "sending " + debug.toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -196,7 +207,9 @@ class Communicator {
         public void onServerData(byte trustServer, byte trustClient) {
             synchronized (mTrustMessages) {
                 if (!mTrustMessages.isEmpty()) {
-                    Log.d("XXX", "trustClient : " + trustClient + ", mTrustClient: " + mTrustClient);
+                    if (DEBUG_RECEIVING) {
+                        Log.d(RECEIVE_TAG, "trustClient : " + trustClient + ", mTrustClient: " + mTrustClient);
+                    }
                     if (trustClient == mTrustClient) {
                         mTrustMessages.remove(0);
                         mTrustClient++;
@@ -211,7 +224,9 @@ class Communicator {
             buf.put(ident);
             buf.put((byte) message.length);
             buf.put(message);
-            Log.d("XXX", "addTrustedMessage: '" + new String(buf.array(), 0, buf.position()) + "'");
+            if (DEBUG_SENDING) {
+                Log.d(SEND_TAG, "addTrustedMessage: '" + new String(buf.array(), 0, buf.position()) + "'");
+            }
 
             synchronized (mTrustMessages) {
                 mTrustMessages.add(buf.array());
