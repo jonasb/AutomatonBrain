@@ -126,9 +126,23 @@ class Communicator {
                 return;
             }
 
+            final ByteBuffer buffer = ByteBuffer.allocate(1024);
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
             float rotationCumulative = 0;
             float cameraAngleCumulative = 0;
             while (mRunning) {
+                buffer.clear();
+                buffer.put("CTRL".getBytes());
+                buffer.put(mTrustServer);
+                buffer.put(mTrustClient);
+                buffer.put((byte) 0); //padding
+                buffer.put((byte) 0); //padding
+                rotationCumulative += mNavigator.rotation * 20;
+                buffer.putInt(closestZero(rotationCumulative)); //mx
+                cameraAngleCumulative += mNavigator.cameraAngle * 10;
+                buffer.putInt(closestZero(cameraAngleCumulative)); //my
+                buffer.putInt((int) (mNavigator.moveX * 128)); //dx -1..1 -> -127..127
+                buffer.putInt((int) (mNavigator.moveY * 128)); //dy -1..1 -> -127..127
                 byte kb = 0;
                 if (mNavigator.left)
                     kb |= 1;
@@ -138,22 +152,6 @@ class Communicator {
                     kb |= 1 << 2;
                 if (mNavigator.down)
                     kb |= 1 << 3;
-                //TODO reuse buffer/modify the data
-                final ByteBuffer buffer = ByteBuffer.allocate(1024);
-                buffer.order(ByteOrder.LITTLE_ENDIAN);
-                buffer.put("CTRL".getBytes());
-                buffer.put(mTrustServer);
-                buffer.put(mTrustClient);
-                buffer.put((byte) 0); //padding
-                buffer.put((byte) 0); //padding
-
-                rotationCumulative += mNavigator.rotation * 20;
-                cameraAngleCumulative += mNavigator.cameraAngle * 10;
-
-                buffer.putInt(closestZero(rotationCumulative)); //mx
-                buffer.putInt(closestZero(cameraAngleCumulative)); //my
-                buffer.putInt((int) (mNavigator.moveX * 128)); //dx -1..1 -> -127..127
-                buffer.putInt((int) (mNavigator.moveY * 128)); //dy -1..1 -> -127..127
                 buffer.put(kb);
                 buffer.put((byte) 0); //padding
                 buffer.put((byte) 0); //padding
