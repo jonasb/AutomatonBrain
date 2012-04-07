@@ -11,6 +11,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 class Communicator {
@@ -118,6 +119,8 @@ class Communicator {
                 return;
             }
 
+            float rotationCumulative = 0;
+            float cameraAngleCumulative = 0;
             while (mRunning) {
                 byte kb = 0;
                 if (mNavigator.left)
@@ -130,13 +133,18 @@ class Communicator {
                     kb |= 1 << 3;
                 //TODO reuse buffer/modify the data
                 ByteBuffer buffer = ByteBuffer.allocate(1024);
+                buffer.order(ByteOrder.LITTLE_ENDIAN);
                 buffer.put("CTRL".getBytes());
                 buffer.put(mTrustServer);
                 buffer.put(mTrustClient);
                 buffer.put((byte) 0); //padding
                 buffer.put((byte) 0); //padding
-                buffer.putInt(0); //mx
-                buffer.putInt(0); //my
+
+                rotationCumulative += mNavigator.rotation * 20;
+                cameraAngleCumulative += mNavigator.cameraAngle * 10;
+
+                buffer.putInt(closestZero(rotationCumulative)); //mx
+                buffer.putInt(closestZero(cameraAngleCumulative)); //my
                 buffer.putInt((int) (mNavigator.moveX * 128)); //dx -1..1 -> -127..127
                 buffer.putInt((int) (mNavigator.moveY * 128)); //dy -1..1 -> -127..127
                 buffer.put(kb);
@@ -175,6 +183,10 @@ class Communicator {
                     //ignore
                 }
             }
+        }
+
+        private int closestZero(float v) {
+            return (int) (v < 0 ? Math.ceil(v) : Math.floor(v));
         }
 
         public void abort() {

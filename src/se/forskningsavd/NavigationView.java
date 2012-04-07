@@ -32,16 +32,24 @@ class NavigationView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
+        case ACTION_POINTER_DOWN:
+            return true;
         case ACTION_MOVE:
         case ACTION_DOWN:
             final int width = getWidth();
             final int height = getHeight();
 
-            final float x = event.getX();
-            final float y = event.getY();
-
-            mNavigator.moveX = (x - width / 2) / (width / 2);
-            mNavigator.moveY = (y - height / 2) / (height / 2);
+            for (int i = 0; i < event.getPointerCount(); i++) {
+                final float x = event.getX(i);
+                final float y = event.getY(i);
+                if (x < width / 2) {
+                    mNavigator.moveX = (x - width / 4) / (width / 4);
+                    mNavigator.moveY = (y - height / 2) / (height / 2);
+                } else {
+                    mNavigator.rotation = (x - width / 2 - width / 4) / (width / 4);
+                    mNavigator.cameraAngle = (y - height / 2) / (height / 2);
+                }
+            }
             /*
             // wasd
             mNavigator.left = (x < width / 3);

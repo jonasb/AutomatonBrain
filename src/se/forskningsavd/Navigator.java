@@ -8,9 +8,11 @@ class Navigator {
 
     public float moveX = 0; // -1.0..1.0
     public float moveY = 0; // -1.0..1.0
+    public float rotation = 0; // -1.0..1.0
+    public float cameraAngle = 0; // -1.0..1.0
 
     public void reset() {
         up = down = left = right = false;
-        moveX = moveY = 0;
+        moveX = moveY = rotation = cameraAngle = 0;
     }
 }
