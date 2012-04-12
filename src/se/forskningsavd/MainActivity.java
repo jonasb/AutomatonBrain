@@ -3,6 +3,9 @@ package se.forskningsavd;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -61,6 +64,23 @@ public class MainActivity extends Activity {
         layout.addView(frame, MATCH_PARENT, MATCH_PARENT);
 
         setContentView(layout);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        final MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_light) {
+            mCommunicator.sendText("/light");
+        } else {
+            return false;
+        }
+        return true;
     }
 
     @Override
