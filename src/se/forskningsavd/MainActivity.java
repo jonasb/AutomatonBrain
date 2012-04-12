@@ -1,21 +1,19 @@
 package se.forskningsavd;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.view.*;
+import android.view.inputmethod.EditorInfo;
+import android.widget.*;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 public class MainActivity extends Activity {
     private Communicator mCommunicator;
+    private String mLastMessage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,16 +41,6 @@ public class MainActivity extends Activity {
         });
         layout.addView(button);
 
-        final Button helloWorld = new Button(this);
-        helloWorld.setText("Automaton brain");
-        helloWorld.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                mCommunicator.sendText("/voice");
-                mCommunicator.sendText("Automaton brain");
-            }
-        });
-        layout.addView(helloWorld);
-
         final FrameLayout frame = new FrameLayout(this);
 
         video.setImageBitmap(target);
@@ -75,12 +63,62 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_light) {
+        switch (item.getItemId()) {
+        case R.id.menu_light:
             mCommunicator.sendText("/light");
-        } else {
+            return true;
+        case R.id.menu_mirror:
+            mCommunicator.sendText("/mirror");
+            return true;
+        case R.id.menu_speak:
+            speak();
+            return true;
+        default:
             return false;
         }
-        return true;
+    }
+
+    private void speak() {
+        final AlertDialog dialog = new AlertDialog.Builder(this).create();
+
+        // editor
+        final EditText message = new EditText(this);
+        message.setText(mLastMessage);
+        message.setSelectAllOnFocus(true);
+        message.setSingleLine();
+        message.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                }
+            }
+        });
+        message.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        message.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    dialog.getButton(DialogInterface.BUTTON_POSITIVE).performClick();
+                    return true;
+                }
+                return false;
+            }
+        });
+        dialog.setView(message);
+
+        // speak button
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Speaketh", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+                final String msg = message.getText().toString();
+                if (msg.length() > 0) {
+                    mCommunicator.sendText(msg);
+                    MainActivity.this.mLastMessage = msg;
+                }
+            }
+        });
+
+        // show
+        dialog.show();
     }
 
     @Override

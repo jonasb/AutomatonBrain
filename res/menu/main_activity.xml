@@ -3,4 +3,10 @@
     <item android:id="@+id/menu_light"
           android:title="Light"
           android:showAsAction="always|withText"/>
+    <item android:id="@+id/menu_mirror"
+          android:title="Mirror"
+          android:showAsAction="ifRoom|withText"/>
+    <item android:id="@+id/menu_speak"
+          android:title="Speak"
+          android:showAsAction="always|withText"/>
 </menu>
