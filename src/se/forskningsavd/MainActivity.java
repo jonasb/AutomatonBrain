@@ -80,6 +80,7 @@ public class MainActivity extends Activity {
 
     private void speak() {
         final AlertDialog dialog = new AlertDialog.Builder(this).create();
+        dialog.setCanceledOnTouchOutside(true);
 
         // editor
         final EditText message = new EditText(this);
