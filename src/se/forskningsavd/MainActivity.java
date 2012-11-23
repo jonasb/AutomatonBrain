@@ -1,5 +1,8 @@
 package se.forskningsavd;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -33,12 +36,24 @@ public class MainActivity extends SherlockActivity {
         final LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
+        final Spinner spinner = new Spinner(this);
+        List<String> list = new ArrayList<String>();
+        list.add("0");
+        list.add("1");
+        list.add("2");
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(dataAdapter);
+        layout.addView(spinner);
+        
         final Button button = new Button(this);
-        button.setText("Connect");
+        button.setText("Connect!");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                mCommunicator.connect();
+                mCommunicator.connect(Integer.parseInt(String.valueOf(spinner.getSelectedItem())));
                 button.setVisibility(View.GONE);
+                spinner.setVisibility(View.GONE);
             }
         });
         layout.addView(button);

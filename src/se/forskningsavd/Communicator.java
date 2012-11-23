@@ -105,10 +105,12 @@ class Communicator {
         private byte mTrustClient;
         private final ArrayList<byte[]> mTrustMessages = new ArrayList<byte[]>();
         private int mTrustTimeout;
+        private int mRobotOffset;
 
-        public SenderThread(DatagramSocket socket, Navigator navigator) {
+        public SenderThread(DatagramSocket socket, Navigator navigator, int robot_offset) {
             mSocket = socket;
             mNavigator = navigator;
+            mRobotOffset = robot_offset;
         }
 
         @Override
@@ -119,7 +121,7 @@ class Communicator {
                 final String message = "HELO";
                 final byte[] buf = message.getBytes();
 
-                final DatagramPacket out = new DatagramPacket(buf, buf.length, hostAddress, Settings.PORT);
+                final DatagramPacket out = new DatagramPacket(buf, buf.length, hostAddress, Settings.PORT + mRobotOffset);
                 mSocket.send(out);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -172,7 +174,7 @@ class Communicator {
                     }
                 }
 
-                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, Settings.PORT);
+                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, Settings.PORT + mRobotOffset);
                 try {
                     mSocket.send(out);
                     if (DEBUG_SENDING) {
@@ -244,7 +246,7 @@ class Communicator {
         mCallback = callback;
     }
 
-    public void connect() {
+    public void connect(int robot_id) {
         disconnect();
 
         final DatagramSocket socket;
@@ -254,7 +256,7 @@ class Communicator {
             e.printStackTrace();
             return;
         }
-        mSenderThread = new SenderThread(socket, mNavigator);
+        mSenderThread = new SenderThread(socket, mNavigator, robot_id);
         mSenderThread.start();
 
         final Decoder d = new Decoder();
