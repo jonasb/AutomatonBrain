@@ -75,7 +75,7 @@ class Communicator {
                             // TODO signed vs unsigned
                             final byte trustServer = data.get(4);
                             final byte trustClient = data.get(5);
-                            final int timer = data.getInt(6);
+                            //final int timer = data.getInt(6);
                             mSenderThread.onServerData(trustServer, trustClient);
 
                             //TODO handle server trusted data

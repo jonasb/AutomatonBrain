@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -20,6 +21,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 public class MainActivity extends SherlockActivity {
     private Communicator mCommunicator;
     private String mLastMessage;
+    public static final String PREFS_NAME = "ConnectionPreferences";
+    private Settings mSettings;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,10 @@ public class MainActivity extends SherlockActivity {
             }
         });
 
+        // Restore preferences
+        SharedPreferences settings = getPreferences(MODE_PRIVATE);
+        mSettings = new Settings(settings);
+
         final LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
@@ -41,11 +48,12 @@ public class MainActivity extends SherlockActivity {
 		Uri data = getIntent().getData();
 		if (data != null)
 		{
-			mCommunicator.connect(new Robot(data.getPath(),data.getHost(),data.getPort()));
+			mSettings.AddRobot(data);
+			mCommunicator.connect(new Robot(data));
 		}
 		else
 		{
-			List<Robot> list = Settings.GetRobotList();
+			List<Robot> list = mSettings.GetRobotList();
 	        ArrayAdapter<Robot> dataAdapter = new ArrayAdapter<Robot>(this,
 	                android.R.layout.simple_spinner_item, list);
 	        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
