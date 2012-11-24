@@ -1,7 +1,8 @@
-package se.forskningsavd;
+package se.forskningsavd.automatonbrain;
 
 import java.util.List;
 
+import se.forskningsavd.automatonbrain.R;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;

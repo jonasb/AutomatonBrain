@@ -1,4 +1,4 @@
-package se.forskningsavd;
+package se.forskningsavd.automatonbrain;
 
 import java.util.Locale;
 

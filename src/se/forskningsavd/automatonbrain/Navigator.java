@@ -1,4 +1,4 @@
-package se.forskningsavd;
+package se.forskningsavd.automatonbrain;
 
 class Navigator {
     public boolean left = false;
