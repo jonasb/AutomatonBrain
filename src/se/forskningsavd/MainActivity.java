@@ -1,6 +1,5 @@
 package se.forskningsavd;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -12,6 +11,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
+import android.net.Uri;
+
 import com.actionbarsherlock.app.SherlockActivity;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -37,26 +38,31 @@ public class MainActivity extends SherlockActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final Spinner spinner = new Spinner(this);
-        List<String> list = new ArrayList<String>();
-        list.add("0");
-        list.add("1");
-        list.add("2");
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, list);
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(dataAdapter);
-        layout.addView(spinner);
-        
-        final Button button = new Button(this);
-        button.setText("Connect!");
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                mCommunicator.connect(Integer.parseInt(String.valueOf(spinner.getSelectedItem())));
-                button.setVisibility(View.GONE);
-                spinner.setVisibility(View.GONE);
-            }
-        });
-        layout.addView(button);
+		Uri data = getIntent().getData();
+		if (data != null)
+		{
+			mCommunicator.connect(new Robot(data.getPath(),data.getHost(),data.getPort()));
+		}
+		else
+		{
+			List<Robot> list = Settings.GetRobotList();
+	        ArrayAdapter<Robot> dataAdapter = new ArrayAdapter<Robot>(this,
+	                android.R.layout.simple_spinner_item, list);
+	        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	        spinner.setAdapter(dataAdapter);
+	        layout.addView(spinner);
+	        
+	        final Button button = new Button(this);
+	        button.setText("Connect!");
+	        button.setOnClickListener(new View.OnClickListener() {
+	            public void onClick(View view) {
+	                mCommunicator.connect((Robot) spinner.getSelectedItem());
+	                button.setVisibility(View.GONE);
+	                spinner.setVisibility(View.GONE);
+	            }
+	        });
+	        layout.addView(button);
+		}
 
         final FrameLayout frame = new FrameLayout(this);
 

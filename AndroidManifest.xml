@@ -3,7 +3,7 @@
         package="se.forskningsavd"
         android:versionCode="1"
         android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="15"/>
+    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="15"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <application android:label="@string/app_name" android:theme="@style/Theme.Sherlock">
         <activity android:name="MainActivity"
@@ -12,6 +12,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+           <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="robocortex"/>
             </intent-filter>
         </activity>
     </application>

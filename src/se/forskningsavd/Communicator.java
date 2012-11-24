@@ -105,23 +105,23 @@ class Communicator {
         private byte mTrustClient;
         private final ArrayList<byte[]> mTrustMessages = new ArrayList<byte[]>();
         private int mTrustTimeout;
-        private int mRobotOffset;
+        private Robot mRobot;
 
-        public SenderThread(DatagramSocket socket, Navigator navigator, int robot_offset) {
+        public SenderThread(DatagramSocket socket, Navigator navigator, Robot robot) {
             mSocket = socket;
             mNavigator = navigator;
-            mRobotOffset = robot_offset;
+            mRobot = robot;
         }
 
         @Override
         public void run() {
             final InetAddress hostAddress;
             try {
-                hostAddress = InetAddress.getByName(Settings.HOST);
+                hostAddress = InetAddress.getByName(mRobot.HOST);
                 final String message = "HELO";
                 final byte[] buf = message.getBytes();
 
-                final DatagramPacket out = new DatagramPacket(buf, buf.length, hostAddress, Settings.PORT + mRobotOffset);
+                final DatagramPacket out = new DatagramPacket(buf, buf.length, hostAddress, mRobot.PORT);
                 mSocket.send(out);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -174,7 +174,7 @@ class Communicator {
                     }
                 }
 
-                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, Settings.PORT + mRobotOffset);
+                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, mRobot.PORT);
                 try {
                     mSocket.send(out);
                     if (DEBUG_SENDING) {
@@ -246,7 +246,7 @@ class Communicator {
         mCallback = callback;
     }
 
-    public void connect(int robot_id) {
+    public void connect(Robot robot) {
         disconnect();
 
         final DatagramSocket socket;
@@ -256,7 +256,7 @@ class Communicator {
             e.printStackTrace();
             return;
         }
-        mSenderThread = new SenderThread(socket, mNavigator, robot_id);
+        mSenderThread = new SenderThread(socket, mNavigator, robot);
         mSenderThread.start();
 
         final Decoder d = new Decoder();

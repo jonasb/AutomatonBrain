@@ -5,3 +5,6 @@ libs/
 obj/
 out/
 local.properties
+.classpath
+.project
+.settings
