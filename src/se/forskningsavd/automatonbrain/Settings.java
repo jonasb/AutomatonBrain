@@ -1,5 +1,6 @@
 package se.forskningsavd.automatonbrain;
 
+import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,13 +24,19 @@ final class Settings {
 		Iterator<String> itr = robot_uris.iterator();
 		while (itr.hasNext()) {
 			Uri r = Uri.parse(itr.next());
-			mRobots.add(new Robot(r));
+			try {
+				mRobots.add(new Robot(r));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		if (robot_uris.size() == 0)
+			robot_uris = default_robots;
 	}
 
-	public void AddRobot(Uri robotdata) {
-		Robot r = new Robot(robotdata);
-		if (mRobots.get(0).equals(r))
+	public void AddRobot(Robot r) {
+		if (mRobots.size() > 0 && mRobots.get(0).equals(r))
 			return;
 
 		Iterator<Robot> itr = mRobots.iterator();

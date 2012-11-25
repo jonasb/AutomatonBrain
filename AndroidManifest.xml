@@ -17,7 +17,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="robocortex"/>
+                <data android:scheme="http" android:host="forskningsavd.se"
+                android:pathPrefix="/robocortex" />
             </intent-filter>
         </activity>
     </application>

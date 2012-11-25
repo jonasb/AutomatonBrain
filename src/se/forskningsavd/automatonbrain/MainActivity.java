@@ -1,5 +1,6 @@
 package se.forskningsavd.automatonbrain;
 
+import java.text.ParseException;
 import java.util.List;
 
 import se.forskningsavd.automatonbrain.R;
@@ -49,8 +50,14 @@ public class MainActivity extends SherlockActivity {
 		Uri data = getIntent().getData();
 		if (data != null)
 		{
-			mSettings.AddRobot(data);
-			mCommunicator.connect(new Robot(data));
+			try {
+				Robot r = new Robot(data);
+				mSettings.AddRobot(r);
+				mCommunicator.connect(r);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		else
 		{
