@@ -12,7 +12,7 @@ AVPacket           avpkt;                      // Used in the decoding process
 int                temp;                       // Various uses
 
 
-bool Java_se_forskningsavd_Decoder_init(JNIEnv* env, jobject thiz) {
+bool Java_se_forskningsavd_automatonbrain_Decoder_init(JNIEnv* env, jobject thiz) {
     avcodec_init();
     avcodec_register_all();
     pCodecCtx = avcodec_alloc_context();
@@ -30,7 +30,7 @@ bool Java_se_forskningsavd_Decoder_init(JNIEnv* env, jobject thiz) {
     return true;
 }
 
-bool Java_se_forskningsavd_Decoder_decode(JNIEnv *env, jobject thiz, jbyteArray frame, jobject bitmap) {
+bool Java_se_forskningsavd_automatonbrain_Decoder_decode(JNIEnv *env, jobject thiz, jbyteArray frame, jobject bitmap) {
     AndroidBitmapInfo bitmapInfo;
     if (AndroidBitmap_getInfo(env, bitmap, &bitmapInfo) != 0) {
         return false;

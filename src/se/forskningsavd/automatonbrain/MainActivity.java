@@ -1,7 +1,12 @@
-package se.forskningsavd;
+package se.forskningsavd.automatonbrain;
 
+import java.text.ParseException;
+import java.util.List;
+
+import se.forskningsavd.automatonbrain.R;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -9,6 +14,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
+import android.net.Uri;
+
 import com.actionbarsherlock.app.SherlockActivity;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -16,6 +23,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 public class MainActivity extends SherlockActivity {
     private Communicator mCommunicator;
     private String mLastMessage;
+    public static final String PREFS_NAME = "ConnectionPreferences";
+    private Settings mSettings;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,18 +39,46 @@ public class MainActivity extends SherlockActivity {
             }
         });
 
+        // Restore preferences
+        SharedPreferences settings = getPreferences(MODE_PRIVATE);
+        mSettings = new Settings(settings);
+
         final LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        final Button button = new Button(this);
-        button.setText("Connect");
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                mCommunicator.connect();
-                button.setVisibility(View.GONE);
-            }
-        });
-        layout.addView(button);
+        final Spinner spinner = new Spinner(this);
+		Uri data = getIntent().getData();
+		if (data != null)
+		{
+			try {
+				Robot r = new Robot(data);
+				mSettings.AddRobot(r);
+				mCommunicator.connect(r);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			List<Robot> list = mSettings.GetRobotList();
+	        ArrayAdapter<Robot> dataAdapter = new ArrayAdapter<Robot>(this,
+	                android.R.layout.simple_spinner_item, list);
+	        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	        spinner.setAdapter(dataAdapter);
+	        layout.addView(spinner);
+	        
+	        final Button button = new Button(this);
+	        button.setText("Connect!");
+	        button.setOnClickListener(new View.OnClickListener() {
+	            public void onClick(View view) {
+	                mCommunicator.connect((Robot) spinner.getSelectedItem());
+	                button.setVisibility(View.GONE);
+	                spinner.setVisibility(View.GONE);
+	            }
+	        });
+	        layout.addView(button);
+		}
 
         final FrameLayout frame = new FrameLayout(this);
 

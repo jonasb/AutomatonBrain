@@ -1,4 +1,4 @@
-package se.forskningsavd;
+package se.forskningsavd.automatonbrain;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -75,7 +75,7 @@ class Communicator {
                             // TODO signed vs unsigned
                             final byte trustServer = data.get(4);
                             final byte trustClient = data.get(5);
-                            final int timer = data.getInt(6);
+                            //final int timer = data.getInt(6);
                             mSenderThread.onServerData(trustServer, trustClient);
 
                             //TODO handle server trusted data
@@ -105,21 +105,23 @@ class Communicator {
         private byte mTrustClient;
         private final ArrayList<byte[]> mTrustMessages = new ArrayList<byte[]>();
         private int mTrustTimeout;
+        private Robot mRobot;
 
-        public SenderThread(DatagramSocket socket, Navigator navigator) {
+        public SenderThread(DatagramSocket socket, Navigator navigator, Robot robot) {
             mSocket = socket;
             mNavigator = navigator;
+            mRobot = robot;
         }
 
         @Override
         public void run() {
             final InetAddress hostAddress;
             try {
-                hostAddress = InetAddress.getByName(Settings.HOST);
+                hostAddress = InetAddress.getByName(mRobot.HOST);
                 final String message = "HELO";
                 final byte[] buf = message.getBytes();
 
-                final DatagramPacket out = new DatagramPacket(buf, buf.length, hostAddress, Settings.PORT);
+                final DatagramPacket out = new DatagramPacket(buf, buf.length, hostAddress, mRobot.PORT);
                 mSocket.send(out);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -172,7 +174,7 @@ class Communicator {
                     }
                 }
 
-                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, Settings.PORT);
+                final DatagramPacket out = new DatagramPacket(buffer.array(), buffer.position(), hostAddress, mRobot.PORT);
                 try {
                     mSocket.send(out);
                     if (DEBUG_SENDING) {
@@ -244,7 +246,7 @@ class Communicator {
         mCallback = callback;
     }
 
-    public void connect() {
+    public void connect(Robot robot) {
         disconnect();
 
         final DatagramSocket socket;
@@ -254,7 +256,7 @@ class Communicator {
             e.printStackTrace();
             return;
         }
-        mSenderThread = new SenderThread(socket, mNavigator);
+        mSenderThread = new SenderThread(socket, mNavigator, robot);
         mSenderThread.start();
 
         final Decoder d = new Decoder();

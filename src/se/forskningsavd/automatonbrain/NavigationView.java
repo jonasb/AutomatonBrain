@@ -1,4 +1,4 @@
-package se.forskningsavd;
+package se.forskningsavd.automatonbrain;
 
 import android.content.Context;
 import android.graphics.Canvas;
