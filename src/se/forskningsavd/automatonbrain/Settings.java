@@ -18,21 +18,22 @@ final class Settings {
 		mPrefs = prefs;
 		mRobots = new ArrayList<Robot>();
 		Set<String> default_robots = new LinkedHashSet<String>();
-		default_robots.add("robocortex://kiwiray1:6979/kiwi_wifi");
-		Set<String> robot_uris = mPrefs.getStringSet("robots", default_robots);
+		default_robots.add("http://wiki.forskningsavd.se/RoboCortex#kiwiray1/6979/kiwi_wifi");
+		Set<String> robot_uris = mPrefs.getStringSet("robots",default_robots);
 		// get the Iterator
 		Iterator<String> itr = robot_uris.iterator();
 		while (itr.hasNext()) {
 			Uri r = Uri.parse(itr.next());
 			try {
-				mRobots.add(new Robot(r));
+				Robot rob = new Robot(r);
+				mRobots.add(rob);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		if (robot_uris.size() == 0)
-			robot_uris = default_robots;
+		if (mRobots.size() == 0)
+			mRobots.add(new Robot("kiwi_wifi","kiwiray1",6979));
 	}
 
 	public void AddRobot(Robot r) {

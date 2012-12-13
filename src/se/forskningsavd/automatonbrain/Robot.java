@@ -3,6 +3,7 @@ package se.forskningsavd.automatonbrain;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Arrays;
 
 import android.net.Uri;
 
@@ -18,14 +19,15 @@ public class Robot {
 	}
 
 	public Robot(Uri uri) throws ParseException {
-		if (uri.getScheme().equals("http") && uri.getAuthority().equals("forskningsavd.se"))
+		if (uri.getScheme().equals("http") && uri.getAuthority().equals("wiki.forskningsavd.se"))
 		{
 			List<String> parts = uri.getPathSegments();
-			if (parts.get(0).equals("robocortex"))
+			if (parts.get(0).equals("RoboCortex"))
 			{
-				HOST = parts.get(1);
-				PORT = Integer.parseInt(parts.get(2));
-				NAME = parts.get(3);
+				List<String> other_parts = Arrays.asList(uri.getFragment().split("/"));
+				HOST = other_parts.get(0);
+				PORT = Integer.parseInt(other_parts.get(1));
+				NAME = other_parts.get(2);
 			}
 			else
 			{
@@ -39,7 +41,7 @@ public class Robot {
 	}
 
 	public Uri toUri() {
-		return Uri.parse(String.format(Locale.ENGLISH, "http://forskningsavd.se/robocortex/%s/%d/%s",
+		return Uri.parse(String.format(Locale.ENGLISH, "http://wiki.forskningsavd.se/RoboCortex#%s/%d/%s",
 				HOST, PORT, NAME));
 	}
 
